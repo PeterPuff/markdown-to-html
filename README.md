@@ -38,7 +38,7 @@ The tool has an option to embed linked local images as base64. This is useful to
 
 The tool can be installed as global dotnet tool via `dotnet tool install -g PeterPuff.MarkdownToHtml`.
 
-After installing you can invoke it via: `mdtohtml <markdown-file> <html-template-file> <output-file> <embed-images>`.
+After installing you can invoke it via: `mdtohtml <markdown-file> <html-template-file> <output-file> <embed-images> <use-prism>`.
 
 ### Arguments
 
@@ -46,3 +46,4 @@ After installing you can invoke it via: `mdtohtml <markdown-file> <html-template
 - `<html-template-file>`: HTML file to use as template
 - `<output-file>`: Path to output HTML file to write
 - `<embed-images>`: 1 to embed (local) images as base64; 0 to keep image references as they are
+- `<use-prism>`: 1 to enable syntax highlighting via Prism.js; 0 if Prism.js is not used in the template

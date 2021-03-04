@@ -11,13 +11,14 @@ namespace PeterPuff.MarkdownToHtml
     {
         internal static int Main(string[] args)
         {
-            if (args.Length != 4)
+            if (args.Length != 5)
             {
-                Console.WriteLine($"Usage: {Path.GetFileName(Assembly.GetExecutingAssembly().Location)} <markdown-file> <html-template-file> <output-file> <embed-images>");
+                Console.WriteLine($"Usage: {Path.GetFileName(Assembly.GetExecutingAssembly().Location)} <markdown-file> <html-template-file> <output-file> <embed-images> <use-prism>");
                 Console.WriteLine("<markdown-file>: Path to Markdown file to convert");
                 Console.WriteLine("<html-template-file>: HTML file to use as template");
                 Console.WriteLine("<output-file>: Path to output HTML file to write");
                 Console.WriteLine("<embed-images>: 1 to embed (local) images as base64; 0 to keep image references as they are");
+                Console.WriteLine("<use-prism>: 1 to enable syntax highlighting via Prism.js; 0 if Prism.js is not used in the template");
                 return 1;
             }
 
@@ -25,6 +26,7 @@ namespace PeterPuff.MarkdownToHtml
             string htmlTemplateFile = args[1];
             string outputFile = args[2];
             bool embedImages = args[3] == "1";
+            bool usePrism = args[4] == "1";
 
             var loggerFactory = LoggerFactory.Create(builder => builder.AddSimpleConsole(options => options.SingleLine = true));
             var logger = loggerFactory.CreateLogger(string.Empty);
@@ -69,7 +71,7 @@ namespace PeterPuff.MarkdownToHtml
 
             try
             {
-                ConvertMarkdownToHtml(markdown, htmlTemplate, outputFile, sourceDirectory, embedImages, logger);
+                ConvertMarkdownToHtml(markdown, htmlTemplate, outputFile, sourceDirectory, embedImages, usePrism, logger);
                 logger.LogInformation(new EventId(1002), "...success");
             }
             catch (Exception ex)
@@ -81,23 +83,25 @@ namespace PeterPuff.MarkdownToHtml
             return 0;
         }
 
-        private static void ConvertMarkdownToHtml(string markdown, string htmlTemplate, string outputFile, string sourceDirectory, bool embedImages, ILogger logger)
+        private static void ConvertMarkdownToHtml(string markdown, string htmlTemplate, string outputFile, string sourceDirectory, bool embedImages, bool usePrism, ILogger logger)
         {
-            var pipeline = CreateMarkdownPipeline(embedImages, sourceDirectory);
+            var pipeline = CreateMarkdownPipeline(embedImages, usePrism, sourceDirectory);
             var html = Markdown.ToHtml(markdown, pipeline);
             html = htmlTemplate.Replace("{$html}", html);
             File.WriteAllText(outputFile, html);
         }
 
-        private static MarkdownPipeline CreateMarkdownPipeline(bool embedImages, string sourceDirectory)
+        private static MarkdownPipeline CreateMarkdownPipeline(bool embedImages, bool usePrism, string sourceDirectory)
         {
             var builder = new MarkdownPipelineBuilder();
             builder.UseAdvancedExtensions();
-            builder.UsePrism();
             builder.DebugLog = Console.Out;
 
             if (embedImages)
                 builder.Use(new EmbedLocalImagesExtension(sourceDirectory));
+
+            if (usePrism)
+                builder.UsePrism();
 
             return builder.Build();
         }
