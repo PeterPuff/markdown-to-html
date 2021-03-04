@@ -1,5 +1,7 @@
 # Markdown to HTML
 
+[![Build + Test](https://github.com/PeterPuff/markdown-to-html/actions/workflows/build-test.yml/badge.svg)](https://github.com/PeterPuff/markdown-to-html/actions/workflows/build-test.yml)
+
 ## Description
 
 Markdown to HTML is a tool to convert Markdown documents to HTML pages. 
