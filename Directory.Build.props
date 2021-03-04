@@ -1,0 +1,50 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Versioning -->
+    <PropertyGroup>
+        <VersionWithSuffix>$([System.IO.File]::ReadAllText('$(MsBuildThisFileDirectory)VERSION').Trim())</VersionWithSuffix>
+        <!-- Default to version 0.1.0 if no version was found -->
+        <VersionPrefix Condition="$(VersionWithSuffix) == ''">0.1.0</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring(0, $(VersionWithSuffix.IndexOf('-'))))</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == false">$(VersionWithSuffix)</VersionPrefix>
+        <!-- Increase Build if its a prerelease -->
+        <VersionBuild Condition="$(CreatePrerelease) != ''">$([System.Version]::Parse('$(VersionPrefix)').Build)</VersionBuild>
+        <VersionBuild Condition="$(CreatePrerelease) != ''">$([MSBuild]::Add($(VersionBuild), 1))</VersionBuild>
+        <VersionPrefix Condition="$(CreatePrerelease) != ''">$([System.Version]::Parse('$(VersionPrefix)').ToString(2)).$(VersionBuild)</VersionPrefix>
+        <!-- Use suffix if specified-->
+        <VersionSuffix></VersionSuffix>
+        <VersionSuffix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring($(VersionWithSuffix.IndexOf('-'))))</VersionSuffix>
+        <VersionSuffix Condition="$(VersionSuffix.Contains('-')) == true">$(VersionSuffix.Substring(1))</VersionSuffix>
+        <!-- Use "Version" as "PackageVersion" -->
+        <PackageVersion>$(VersionPrefix)</PackageVersion>
+        <PackageVersion Condition="$(VersionSuffix) != ''">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
+        <!-- Use PackageVersionSuffix instead of VersionSuffix if specified -->
+        <PackageVersion Condition="$(PackageVersionSuffix) != ''">$(VersionPrefix).$(PackageVersionSuffix)</PackageVersion>
+    </PropertyGroup>
+
+    <!-- Properties of all projects of this repo -->
+    <PropertyGroup>
+        <Description>A tool to convert Markdown documents to HTML pages.</Description>
+        <Product>PeterPuff.MarkdownToHtml</Product>
+        <Company>PeterPuff</Company>
+        <Year>$([System.DateTime]::Now.Year)</Year>
+        <Copyright>Copyright © PeterPuff $(Year)</Copyright>
+        <NeutralLanguage>en-US</NeutralLanguage>
+    </PropertyGroup>
+
+    <!-- For repos that contains projects that will be published as NuGet package -->
+    <PropertyGroup>
+        <!--
+        For compatibility with .NET Core following variable names must be used:
+        https://docs.microsoft.com/de-de/nuget/reference/msbuild-targets
+        -->
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/PeterPuff/markdown-to-html</PackageProjectUrl>
+        <Authors>$(Company)</Authors>
+        <!-- Microsoft.SourceLink.GitHub properties -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+</Project>
