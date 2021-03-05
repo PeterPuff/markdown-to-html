@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Ensure processing of all logged messages before exiting
+
 ## 1.0.0
 
 ### Added
