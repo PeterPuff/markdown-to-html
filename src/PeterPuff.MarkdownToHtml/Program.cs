@@ -28,56 +28,58 @@ namespace PeterPuff.MarkdownToHtml
             bool embedImages = args[3] == "1";
             bool usePrism = args[4] == "1";
 
-            var loggerFactory = LoggerFactory.Create(builder => builder.AddSimpleConsole(options => options.SingleLine = true));
-            var logger = loggerFactory.CreateLogger(string.Empty);
+            using (var loggerFactory = LoggerFactory.Create(builder => builder.AddSimpleConsole(options => options.SingleLine = true)))
+            {
+                var logger = loggerFactory.CreateLogger(string.Empty);
 
-            if (File.Exists(markdownFile) == false)
-            {
-                logger.LogError(new EventId(2), "Markdown file '{MarkdownFile}' does not exist!", markdownFile);
-                return 2;
-            }
+                if (File.Exists(markdownFile) == false)
+                {
+                    logger.LogError(new EventId(2), "Markdown file '{MarkdownFile}' does not exist!", markdownFile);
+                    return 2;
+                }
 
-            if (File.Exists(htmlTemplateFile) == false)
-            {
-                logger.LogError(new EventId(3), "HTML template file '{HtmlTemplateFile}' does not exist!", htmlTemplateFile);
-                return 3;
-            }
+                if (File.Exists(htmlTemplateFile) == false)
+                {
+                    logger.LogError(new EventId(3), "HTML template file '{HtmlTemplateFile}' does not exist!", htmlTemplateFile);
+                    return 3;
+                }
 
-            logger.LogInformation(new EventId(1001), "Converting '{MarkdownFile}' to '{OutputFile}' using '{HtmlTemplateFile}'...", markdownFile, outputFile, htmlTemplateFile);
+                logger.LogInformation(new EventId(1001), "Converting '{MarkdownFile}' to '{OutputFile}' using '{HtmlTemplateFile}'...", markdownFile, outputFile, htmlTemplateFile);
 
-            var sourceDirectory = new FileInfo(markdownFile).Directory.FullName;
+                var sourceDirectory = new FileInfo(markdownFile).Directory.FullName;
 
-            string markdown;
-            try
-            {
-                markdown = File.ReadAllText(markdownFile);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(new EventId(4), "An error occured while reading contents of Markdown file '{MarkdownFile}': {ErrorMessage}", markdownFile, ex.Message, ex);
-                return 4;
-            }
+                string markdown;
+                try
+                {
+                    markdown = File.ReadAllText(markdownFile);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(new EventId(4), "An error occured while reading contents of Markdown file '{MarkdownFile}': {ErrorMessage}", markdownFile, ex.Message, ex);
+                    return 4;
+                }
 
-            string htmlTemplate;
-            try
-            {
-                htmlTemplate = File.ReadAllText(htmlTemplateFile);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(new EventId(5), "An error occured while reading contents of HTML template file '{HtmlTemplateFile}': {ErrorMessage}", htmlTemplateFile, ex.Message, ex);
-                return 5;
-            }
+                string htmlTemplate;
+                try
+                {
+                    htmlTemplate = File.ReadAllText(htmlTemplateFile);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(new EventId(5), "An error occured while reading contents of HTML template file '{HtmlTemplateFile}': {ErrorMessage}", htmlTemplateFile, ex.Message, ex);
+                    return 5;
+                }
 
-            try
-            {
-                ConvertMarkdownToHtml(markdown, htmlTemplate, outputFile, sourceDirectory, embedImages, usePrism, logger);
-                logger.LogInformation(new EventId(1002), "...success");
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(new EventId(6), "An error occured while converting Markdown to HTML and writing to file '{OutputFile}': {ErrorMessage}", outputFile, ex.Message, ex);
-                return 6;
+                try
+                {
+                    ConvertMarkdownToHtml(markdown, htmlTemplate, outputFile, sourceDirectory, embedImages, usePrism, logger);
+                    logger.LogInformation(new EventId(1002), "...success");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(new EventId(6), "An error occured while converting Markdown to HTML and writing to file '{OutputFile}': {ErrorMessage}", outputFile, ex.Message, ex);
+                    return 6;
+                }
             }
 
             return 0;
